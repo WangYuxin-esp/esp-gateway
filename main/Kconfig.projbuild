@@ -1,11 +1,11 @@
 menu "APP Configuration"
-    config MODEM_IS_OPEN
+    config ESP_MODEM_ENABLE
         bool "Enable the Modem function"
         default n
         help
             "Turn on the portable Wi-Fi function,it can convert the 4G network into a wifi signal"
 
-    if MODEM_IS_OPEN
+    if ESP_MODEM_ENABLE
         menu "4G Router"
             config 4G_ROUTER_AP_SSID
                 string "SSID as AP"
@@ -138,6 +138,33 @@ menu "APP Configuration"
                 Set the password of Wi-Fi sta interface.
     endmenu
 
+    menu "Wi-Fi Dongle"
+        choice WIFI_DONGLE_ENABLE
+            prompt "Driver Type"
+            default WIFI_DONGLE_USB if IDF_TARGET_ESP32S2 || IDF_TARGET_ESP32S3
+            default WIFI_DONGLE_SPI if IDF_TARGET_ESP32 || IDF_TARGET_ESP32C3
+            help
+                Select which kind of driver will be used in Wi-Fi Dongle.
+
+            config WIFI_DONGLE_USB
+                depends on IDF_TARGET_ESP32S2 || IDF_TARGET_ESP32S3
+                bool "USB"
+                help
+                    Select USB driver for Wi-Fi Dongle.
+
+            config WIFI_DONGLE_SPI
+                depends on IDF_TARGET_ESP32 || IDF_TARGET_ESP32C3
+                bool "SPI"
+                help
+                    Select SPI Slave driver for Wi-Fi Dongle.
+        endchoice
+
+        config ENABLE_SOFTAP_FOR_WIFI_CONFIG
+            bool "Enable Softap for Wi-Fi config(web server)"
+            default n
+            help
+                "Enable Softap for Wi-Fi config(web server)"
+    endmenu
     menu "GPIO Configuration(LED & Button)"
         config GPIO_LED_WIFI
             default "2"
@@ -157,8 +184,15 @@ menu "APP Configuration"
             help
                 Set the GPIO LED of ETH mode.
 
+	config GPIO_LED_DONGLE
+            default "8"
+            int "GPIO LED of Dongle mode"
+            help
+                Set the GPIO LED of Dongle mode.
+		
         config GPIO_BUTTON_SW1
-            default "34"
+            default 34
+            default 5 if IDF_TARGET_ESP32S3
             int "GPIO button of switch"
             help
                 Set the GPIO button of switch.

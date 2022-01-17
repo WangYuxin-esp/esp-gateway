@@ -43,6 +43,7 @@
 #include "button.h"
 #include "esp_gateway_config.h"
 
+
 #if SET_VENDOR_IE
 vendor_ie_data_t *esp_gateway_vendor_ie;
 ap_router_t *ap_router;
@@ -54,10 +55,13 @@ static led_strip_t *pStrip_a;
 static uint8_t s_led_state = 0;
 static uint32_t blink_period = 1;
 #endif // CONFIG_IDF_TARGET_ESP32C3
-feat_type_t g_feat_type = FEAT_TYPE_WIFI;
-static led_handle_t g_led_handle_list[3] = {NULL};
 
+
+static feat_type_t g_feat_type = FEAT_TYPE_WIFI;
+static led_handle_t g_led_handle_list[FEAT_TYPE_MAX] = {NULL};
 static const char *TAG = "main";
+
+extern void esp_driver_init(void);
 
 void button_tap_cb(void *arg)
 {
@@ -121,6 +125,7 @@ void app_main(void)
     g_led_handle_list[FEAT_TYPE_WIFI] = led_gpio_create(GPIO_LED_WIFI, LED_GPIO_DARK_HIGH);
     g_led_handle_list[FEAT_TYPE_ETH]  = led_gpio_create(GPIO_LED_ETH, LED_GPIO_DARK_HIGH);
     g_led_handle_list[FEAT_TYPE_MODEM] = led_gpio_create(GPIO_LED_MODEM, LED_GPIO_DARK_HIGH);
+    g_led_handle_list[FEAT_TYPE_DONGLE] = led_gpio_create(GPIO_LED_DONGLE, LED_GPIO_DARK_HIGH);
 
     led_gpio_state_write(g_led_handle_list[g_feat_type], LED_GPIO_ON);
 
@@ -198,13 +203,13 @@ void app_main(void)
 #endif // CONFIG_IDF_TARGET_ESP32C3
 
             /* Enable napt */
-            esp_gateway_wifi_napt_enable();
+            esp_gateway_wifi_napt_enable(_g_esp_netif_soft_ap_ip.ip.addr);
             esp_wifi_get_mac(ESP_IF_WIFI_AP, (uint8_t*)router_mac);
             ESP_LOGI(TAG, "SoftAP MAC "MACSTR"", MAC2STR(router_mac));
             break;
 
         case FEAT_TYPE_MODEM: {
-#if MODEM_IS_OPEN
+#if ESP_MODEM_ENABLE
             ESP_LOGI(TAG, "============================");
             ESP_LOGI(TAG, "4G Router");
             ESP_LOGI(TAG, "============================");
@@ -223,7 +228,7 @@ void app_main(void)
             esp_gateway_wifi_set(WIFI_MODE_AP, ESP_GATEWAY_4G_ROUTER_AP_SSID, ESP_GATEWAY_4G_ROUTER_AP_PASSWORD, NULL);
             vTaskDelay(pdMS_TO_TICKS(100));
 
-            esp_gateway_wifi_napt_enable();
+            esp_gateway_wifi_napt_enable(_g_esp_netif_soft_ap_ip.ip.addr);
 #endif
             break;
         }
@@ -245,6 +250,42 @@ void app_main(void)
 
             esp_gateway_netif_virtual_init();
 #endif
+            break;
+
+        case FEAT_TYPE_DONGLE:
+            ESP_LOGI(TAG, "============================");
+#if CONFIG_WIFI_DONGLE_USB
+            ESP_LOGI(TAG, "USB Dongle");
+#elif CONFIG_WIFI_DONGLE_SPI
+            ESP_LOGI(TAG, "SPI Dongle");
+#endif
+            ESP_LOGI(TAG, "============================");
+
+            esp_netif_create_default_wifi_sta();
+
+            wifi_init_config_t cfg_dongle = WIFI_INIT_CONFIG_DEFAULT();
+            ESP_ERROR_CHECK(esp_wifi_init(&cfg_dongle));
+            ESP_ERROR_CHECK(esp_wifi_start());
+            ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
+
+#if CONFIG_ENABLE_SOFTAP_FOR_WIFI_CONFIG
+            esp_netif_t *dongle_ap_netif = esp_netif_create_default_wifi_ap();
+            esp_gateway_set_custom_ip_network_segment(dongle_ap_netif, "192.168.5.1", "192.168.5.1", "255.255.255.0");
+            /* Config dns info for AP */
+            ESP_ERROR_CHECK(esp_gateway_wifi_set_dhcps(dongle_ap_netif, ESP_IP4TOADDR(114, 114, 114, 114)));
+            esp_gateway_wifi_set(WIFI_MODE_AP, "USB_Dongle", "12345678");
+#endif
+            esp_gateway_netif_dongle_init();
+
+            esp_driver_init();
+
+            vTaskDelay(pdMS_TO_TICKS(1000));
+#if CONFIG_ENABLE_SOFTAP_FOR_WIFI_CONFIG
+            /* SoftAP Netif Napt Enable */
+            esp_gateway_wifi_napt_enable(ESP_IP4TOADDR(192, 168, 5, 1));
+            /* Driver Netif Napt Enable */
+#endif
+            esp_gateway_wifi_napt_enable(_g_esp_netif_soft_ap_ip.ip.addr);
             break;
 
         default:

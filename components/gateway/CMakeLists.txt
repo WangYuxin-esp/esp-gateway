@@ -1,6 +1,7 @@
 set(srcs "src/board.c"
          "src/gateway_wifi.c"
          "src/led_pwm.c"
+	 "src/gateway_netif_dongle.c"
          "src/gateway_vendor_ie.c")
 
 if(CONFIG_IDF_TARGET_ESP32)

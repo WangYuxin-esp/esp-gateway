@@ -70,7 +70,7 @@ static void event_handler(void *arg, esp_event_base_t event_base,
         s_wifi_is_connected = true;
         xEventGroupSetBits(s_wifi_event_group, GATEWAY_EVENT_STA_CONNECTED);
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        ESP_LOGE(TAG, "Disconnected. Connecting to the AP again...");
+        ESP_LOGI(TAG, "Disconnected. Connecting to the AP again...");
 #if SET_VENDOR_IE
         if (g_feat_type == FEAT_TYPE_WIFI) {
             if ((*esp_gateway_vendor_ie).payload[LEVEL] != 1) {
@@ -103,7 +103,7 @@ static void event_handler(void *arg, esp_event_base_t event_base,
         esp_wifi_connect();
         s_wifi_is_connected = false;
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_AP_STACONNECTED) {
-        ESP_LOGI(TAG, "STA Connecting to the AP");
+        ESP_LOGI(TAG, "STA Connecting to the AP again...");
 #if SET_VENDOR_IE
         if (g_feat_type == FEAT_TYPE_WIFI) {
             ESP_ERROR_CHECK(esp_wifi_set_vendor_ie(false, WIFI_VND_IE_TYPE_BEACON, WIFI_VND_IE_ID_0, esp_gateway_vendor_ie));
@@ -214,15 +214,15 @@ esp_err_t esp_gateway_wifi_set(wifi_mode_t mode, const char *ssid, const char *p
     return ESP_OK;
 }
 
-esp_err_t esp_gateway_wifi_napt_enable()
+esp_err_t esp_gateway_wifi_napt_enable(uint32_t ip)
 {
-#ifdef ESP_GATEWAY_AP_CUSTOM_IP
+#ifdef CONFIG_AP_CUSTOM_IP
     esp_netif_ip_info_t info_t;
     memset(&info_t, 0, sizeof(esp_netif_ip_info_t));
-    ip4addr_aton((const char *)(ESP_GATEWAY_AP_STATIC_IP_ADDR), (ip4_addr_t*)&info_t.ip);
+    ip4addr_aton((const char *)(CONFIG_AP_STATIC_IP_ADDR), (ip4_addr_t*)&info_t.ip);
     ip_napt_enable(info_t.ip.addr, 1);
 #else
-    ip_napt_enable(_g_esp_netif_soft_ap_ip.ip.addr, 1);
+    ip_napt_enable(ip, 1);
 #endif
     ESP_LOGI(TAG, "NAT is enabled");
 
