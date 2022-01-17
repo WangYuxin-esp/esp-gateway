@@ -3,6 +3,12 @@ add_compile_options(-fdiagnostics-color=always)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 
+set(EXTRA_COMPONENT_DIRS)
+
+if ("${IDF_TARGET}" STREQUAL "esp32s2" OR "${IDF_TARGET}" STREQUAL "esp32s3")
+    list(APPEND EXTRA_COMPONENT_DIRS components/usb/tinyusb)
+endif()
+
 if(CONFIG_IDF_TARGET_ESP32 OR CONFIG_IDF_TARGET_ESP32S3)
     set(EXTRA_COMPONENT_DIRS "components/ble_common")
 endif()
