@@ -34,7 +34,7 @@ esp32_v4.3_build:
 
     - rm -rf build sdkconfig
     - idf.py set-target esp32
-    - echo -e "CONFIG_MODEM_IS_OPEN=y\nCONFIG_SET_VENDOR_IE=y\nCONFIG_AP_CUSTOM_IP=y" >> sdkconfig.defaults.esp32
+    - echo -e "CONFIG_ESP_MODEM_ENABLE=y\nCONFIG_SET_VENDOR_IE=y\nCONFIG_AP_CUSTOM_IP=y" >> sdkconfig.defaults.esp32
     - idf.py build
 
 esp32_v4.4_build:
@@ -69,7 +69,7 @@ esp32_v4.4_build:
 
     - rm -rf build sdkconfig
     - idf.py set-target esp32
-    - echo -e "CONFIG_MODEM_IS_OPEN=y\nCONFIG_SET_VENDOR_IE=y\nCONFIG_AP_CUSTOM_IP=y" >> sdkconfig.defaults.esp32
+    - echo -e "CONFIG_ESP_MODEM_ENABLE=y\nCONFIG_SET_VENDOR_IE=y\nCONFIG_AP_CUSTOM_IP=y" >> sdkconfig.defaults.esp32
     - idf.py build
 
 esp32c3_v4.4_build:

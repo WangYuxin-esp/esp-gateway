@@ -13,7 +13,7 @@ if ("${IDF_TARGET}" STREQUAL "esp32" OR "${IDF_TARGET}" STREQUAL "esp32s3")
     list(APPEND EXTRA_COMPONENT_DIRS components/ble_common)
 endif()
 
-set(EXTRA_COMPONENT_DIRS "$ENV{IDF_PATH}/examples/common_components/led_strip")
+list(APPEND EXTRA_COMPONENT_DIRS "$ENV{IDF_PATH}/examples/common_components/led_strip")
 
 string(REGEX REPLACE ".*/\(.*\)" "\\1" CURDIR ${CMAKE_CURRENT_SOURCE_DIR})
 project(${CURDIR})

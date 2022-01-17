@@ -43,7 +43,6 @@
 #include "button.h"
 #include "esp_gateway_config.h"
 
-
 #if SET_VENDOR_IE
 vendor_ie_data_t *esp_gateway_vendor_ie;
 ap_router_t *ap_router;
@@ -56,8 +55,7 @@ static uint8_t s_led_state = 0;
 static uint32_t blink_period = 1;
 #endif // CONFIG_IDF_TARGET_ESP32C3
 
-
-static feat_type_t g_feat_type = FEAT_TYPE_WIFI;
+feat_type_t g_feat_type = FEAT_TYPE_WIFI;
 static led_handle_t g_led_handle_list[FEAT_TYPE_MAX] = {NULL};
 static const char *TAG = "main";
 
@@ -208,7 +206,7 @@ void app_main(void)
             ESP_LOGI(TAG, "SoftAP MAC "MACSTR"", MAC2STR(router_mac));
             break;
 
-        case FEAT_TYPE_MODEM: {
+        case FEAT_TYPE_MODEM:
 #if ESP_MODEM_ENABLE
             ESP_LOGI(TAG, "============================");
             ESP_LOGI(TAG, "4G Router");
@@ -231,7 +229,6 @@ void app_main(void)
             esp_gateway_wifi_napt_enable(_g_esp_netif_soft_ap_ip.ip.addr);
 #endif
             break;
-        }
 
         case FEAT_TYPE_ETH:
 #if CONFIG_IDF_TARGET_ESP32
@@ -273,7 +270,7 @@ void app_main(void)
             esp_gateway_set_custom_ip_network_segment(dongle_ap_netif, "192.168.5.1", "192.168.5.1", "255.255.255.0");
             /* Config dns info for AP */
             ESP_ERROR_CHECK(esp_gateway_wifi_set_dhcps(dongle_ap_netif, ESP_IP4TOADDR(114, 114, 114, 114)));
-            esp_gateway_wifi_set(WIFI_MODE_AP, "USB_Dongle", "12345678");
+            esp_gateway_wifi_set(WIFI_MODE_AP, "ESP_Dongle", "12345678");
 #endif
             esp_gateway_netif_dongle_init();
 
@@ -291,7 +288,7 @@ void app_main(void)
         default:
             break;
     }
-	
+
 	StartWebServer();
 
 #if CONFIG_IDF_TARGET_ESP32C3
