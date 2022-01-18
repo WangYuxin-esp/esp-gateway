@@ -1,11 +1,11 @@
 menu "APP Configuration"
-    config MODEM_IS_OPEN
+    config ESP_MODEM_ENABLE
         bool "Enable the Modem function"
         default n
         help
             "Turn on the portable Wi-Fi function,it can convert the 4G network into a wifi signal"
 
-    if MODEM_IS_OPEN
+    if ESP_MODEM_ENABLE
         menu "4G Router"
             config 4G_ROUTER_AP_SSID
                 string "SSID as AP"
@@ -138,6 +138,70 @@ menu "APP Configuration"
                 Set the password of Wi-Fi sta interface.
     endmenu
 
+    menu "Wi-Fi Dongle"
+        choice WIFI_DONGLE_ENABLE
+            prompt "Driver Type"
+            default WIFI_DONGLE_USB if IDF_TARGET_ESP32S2 || IDF_TARGET_ESP32S3
+            default WIFI_DONGLE_SPI if IDF_TARGET_ESP32 || IDF_TARGET_ESP32C3
+            help
+                Select which kind of driver will be used in Wi-Fi Dongle.
+
+            config WIFI_DONGLE_USB
+                depends on IDF_TARGET_ESP32S2 || IDF_TARGET_ESP32S3
+                bool "USB"
+                help
+                    Select USB driver for Wi-Fi Dongle.
+
+            config WIFI_DONGLE_SPI
+                depends on IDF_TARGET_ESP32 || IDF_TARGET_ESP32C3
+                bool "SPI"
+                help
+                    Select SPI Slave driver for Wi-Fi Dongle.
+        endchoice
+
+        config ENABLE_SOFTAP_FOR_WIFI_CONFIG
+            bool "Enable Softap for Wi-Fi config(web server)"
+            default n
+            help
+                "Enable Softap for Wi-Fi config(web server)"
+
+        if ENABLE_SOFTAP_FOR_WIFI_CONFIG
+            menu "custom ip addr"
+                config STATIC_IP_ADDR
+                    string "Static IP address"
+                    default "192.168.5.1"
+                    help
+                        Set static IP address.
+                        Note: can not set "192.168.4.1"
+
+                config STATIC_GW_ADDR
+                    string "Static gateway address"
+                    default "192.168.5.1"
+                    help
+                        Set static gateway address.
+                        Note: can not set "192.168.4.1"
+
+                config STATIC_NETMASK_ADDR
+                    string "Static netmask address"
+                    default "255.255.255.0"
+                    help
+                        Set static netmask address.
+
+                config SOFTAP_SSID
+                    string "Wi-Fi SSID"
+                    default "ESP_Dongle"
+                    help
+                        Set the SSID of SoftAP.
+
+                config SOFTAP_PASSWORD
+                    string "Wi-Fi Password"
+                    default "12345678"
+                    help
+                        Set the password of SoftAP.
+            endmenu
+        endif
+    endmenu
+
     menu "GPIO Configuration(LED & Button)"
         config GPIO_LED_WIFI
             default "2"
@@ -157,7 +221,14 @@ menu "APP Configuration"
             help
                 Set the GPIO LED of ETH mode.
 
+        config GPIO_LED_DONGLE
+            default "15"
+            int "GPIO LED of Dongle mode"
+            help
+                Set the GPIO LED of Dongle mode.
+		
         config GPIO_BUTTON_SW1
+            default 5 if IDF_TARGET_ESP32S3
             default "34"
             int "GPIO button of switch"
             help
@@ -187,5 +258,4 @@ menu "APP Configuration"
                 GPIO number (IOxx) to blink on and off or the RMT signal for the addressable LED.
                 Some GPIOs are used for other purposes (flash connections, etc.) and cannot be used to blink.
     endmenu
-
 endmenu

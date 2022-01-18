@@ -20,8 +20,12 @@
 #include "lwip/debug.h"
 #include "lwip/tcp.h"
 
-uint8_t virtual_mac[6] = {0};
-esp_netif_t* virtual_netif = NULL;
+#include "esp_gateway_config.h"
+
+uint8_t dongle_mac[6] = {0};
+esp_netif_t* dongle_netif = NULL;
+
+static const char *TAG = "netif_dongle";
 
 //
 // Internal functions declaration referenced in io object
@@ -29,6 +33,9 @@ esp_netif_t* virtual_netif = NULL;
 static esp_err_t netsuite_io_transmit(void *h, void *buffer, size_t len);
 static esp_err_t netsuite_io_transmit_wrap(void *h, void *buffer, size_t len, void *netstack_buf);
 static esp_err_t netsuite_io_attach(esp_netif_t * esp_netif, void * args);
+
+esp_err_t pkt_netif2driver(void *buffer, uint16_t len);
+esp_err_t esp_netif_up(esp_netif_t *esp_netif);
 
 /**
  * @brief IO object netif related configuration with data-path function callbacks
@@ -61,8 +68,8 @@ static const esp_netif_driver_base_t s_driver_base = {
  */
 static esp_err_t netsuite_io_transmit(void *h, void *buffer, size_t len)
 {
-    esp_err_t pkt_virnet2eth(void *buffer, uint16_t len);
-    pkt_virnet2eth(buffer, len);
+    // send data to driver
+    pkt_netif2driver(buffer, len);
     return ESP_OK;
 }
 
@@ -105,35 +112,56 @@ static void *netsuite_io_new(void)
     return (void *)&s_driver_base;
 }
 
-void esp_gateway_netif_virtual_init(void)
+void esp_gateway_netif_dongle_init(void)
 {
     // Netif configs
     //
     esp_netif_ip_info_t ip_info;
+    esp_netif_set_ip4_addr(&ip_info.ip, 192, 168 , 4, 1);
+    esp_netif_set_ip4_addr(&ip_info.gw, 192, 168 , 4, 1);
+    esp_netif_set_ip4_addr(&ip_info.netmask, 255, 255 , 255, 0);
+
     esp_netif_inherent_config_t netif_common_config = {
-            .flags = ESP_NETIF_FLAG_AUTOUP,
+            .flags = (esp_netif_flags_t)(ESP_NETIF_DHCP_SERVER | ESP_NETIF_FLAG_GARP | ESP_NETIF_FLAG_EVENT_IP_MODIFIED),
             .ip_info = (esp_netif_ip_info_t*)&ip_info,
+            .get_ip_event = IP_EVENT_STA_GOT_IP,
+            .lost_ip_event = IP_EVENT_STA_LOST_IP,
             .if_key = "Virtual_key",
             .if_desc = "Netif"
     };
-    esp_netif_set_ip4_addr(&ip_info.ip, 10, 0 , 0, 1);
-    esp_netif_set_ip4_addr(&ip_info.gw, 10, 0 , 0, 1);
-    esp_netif_set_ip4_addr(&ip_info.netmask, 255, 255 , 255, 0);
 
     esp_netif_config_t config = {
         .base = &netif_common_config,                 // use specific behaviour configuration
-        .stack = ESP_NETIF_NETSTACK_DEFAULT_ETH,      // use default WIFI-like network stack configuration
+        .stack = ESP_NETIF_NETSTACK_DEFAULT_WIFI_AP,      // use default WIFI-like network stack configuration
     };
 
     // Netif creation and configuration
     //
-    ESP_ERROR_CHECK(esp_netif_init());
+    // esp_netif_config_t cfg = ESP_NETIF_DEFAULT_WIFI_STA();
     esp_netif_t* netif = esp_netif_new(&config);
     assert(netif);
-    virtual_netif = netif;
+    dongle_netif = netif;
     esp_netif_attach(netif, netsuite_io_new());
 
     // Start the netif in a manual way, no need for events
     //
-    esp_netif_set_mac(netif, virtual_mac);
+    esp_read_mac(dongle_mac, ESP_MAC_WIFI_STA);
+    ESP_LOGI(TAG, "Station MAC "MACSTR"", MAC2STR(dongle_mac));
+    /* Virtual Driver Netif Mac */
+    dongle_mac[5] = dongle_mac[5] + 4;
+    ESP_LOGI(TAG, "Driver Netif MAC "MACSTR"", MAC2STR(dongle_mac));
+    esp_netif_set_mac(netif, dongle_mac);
+    esp_netif_action_start(netif, NULL, 0, NULL);
+    esp_netif_up(netif);
+
+#if !ENABLE_SOFTAP_FOR_WIFI_CONFIG
+    esp_netif_dns_info_t dns;
+    dns.ip.u_addr.ip4.addr = ESP_IP4TOADDR(114, 114, 114, 114);
+    dns.ip.type = IPADDR_TYPE_V4;
+    dhcps_offer_t dhcps_dns_value = OFFER_DNS;
+    esp_netif_dhcps_option(netif, ESP_NETIF_OP_SET, ESP_NETIF_DOMAIN_NAME_SERVER, &dhcps_dns_value, sizeof(dhcps_dns_value));
+    esp_netif_set_dns_info(netif, ESP_NETIF_DNS_MAIN, &dns);
+
+    esp_netif_dhcps_start(netif);
+#endif
 }

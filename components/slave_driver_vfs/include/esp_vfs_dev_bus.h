@@ -1,4 +1,4 @@
-// Copyright 2021 Espressif Systems (Shanghai) PTE LTD
+// Copyright 2015-2020 Espressif Systems (Shanghai) PTE LTD
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,18 +11,16 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+//
 #pragma once
 
-
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-void esp_gateway_netif_virtual_init(void);
+void esp_vfs_dev_spi_register(void);
 
-void esp_gateway_netif_dongle_init(void);
+void esp_vfs_dev_sdio_register(void);
 
 #ifdef __cplusplus
 }

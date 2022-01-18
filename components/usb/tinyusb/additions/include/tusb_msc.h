@@ -1,9 +1,9 @@
-// Copyright 2021 Espressif Systems (Shanghai) PTE LTD
+// Copyright 2020-2021 Espressif Systems (Shanghai) Co. Ltd.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
@@ -14,15 +14,28 @@
 
 #pragma once
 
-
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-void esp_gateway_netif_virtual_init(void);
+#include <stdint.h>
+#include "tusb.h"
+#include "tinyusb.h"
 
-void esp_gateway_netif_dongle_init(void);
+/**
+ * @brief Configuration structure for MSC
+ */
+typedef struct {
+    uint8_t pdrv;             /* Physical drive nmuber (0..) */
+} tinyusb_config_msc_t;
+
+/**
+ * @brief Initialize MSC Device.
+ *
+ * @param cfg - init configuration structure
+ * @return esp_err_t
+ */
+esp_err_t tusb_msc_init(const tinyusb_config_msc_t *cfg);
 
 #ifdef __cplusplus
 }

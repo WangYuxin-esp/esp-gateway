@@ -33,7 +33,7 @@ extern "C"
 esp_err_t esp_gateway_wifi_ap_init(void);
 esp_netif_t *esp_gateway_wifi_init(wifi_mode_t mode);
 esp_err_t esp_gateway_wifi_set(wifi_mode_t mode, const char *ssid, const char *password, const char *bssid);
-esp_err_t esp_gateway_wifi_napt_enable();
+esp_err_t esp_gateway_wifi_napt_enable(uint32_t ip);
 bool esp_gateway_wifi_is_connected();
 esp_err_t esp_gateway_wifi_sta_connected(uint32_t wait_ms);
 esp_err_t esp_gateway_set_custom_ip_network_segment(esp_netif_t *netif, char *ip, char *gateway, char *netmask);
