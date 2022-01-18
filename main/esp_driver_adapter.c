@@ -28,6 +28,8 @@
 #include "esp_netif.h"
 #include "esp_system.h"
 
+#include "esp_gateway_config.h"
+
 #if !CONFIG_IDF_TARGET_ESP32S3
 #include "esp_vfs_dev_bus.h"
 #endif
@@ -39,7 +41,7 @@
 
 static const char* TAG = "DRIVER_ADAPTER";
 
-#if CONFIG_WIFI_DONGLE_SPI
+#if ESP_GATEWAY_WIFI_DONGLE_SPI
 #define MAX_LENGTH 2048
 extern esp_netif_t* dongle_netif;
 static char readbuf[MAX_LENGTH];
@@ -99,7 +101,7 @@ esp_err_t pkt_netif2driver(void *buffer, uint16_t len)
 
 void esp_driver_init(void)
 {
-#if CONFIG_WIFI_DONGLE_USB
+#if ESP_GATEWAY_WIFI_DONGLE_USB
     tusb_net_init();
     ESP_LOGI(TAG, "USB initialization");
 
@@ -109,7 +111,7 @@ void esp_driver_init(void)
 
     ESP_ERROR_CHECK(tinyusb_driver_install(&tusb_cfg));
     ESP_LOGI(TAG, "USB initialization DONE");
-#elif CONFIG_WIFI_DONGLE_SPI
+#elif ESP_GATEWAY_WIFI_DONGLE_SPI
 #if CONFIG_VFS_BASE_ON_SDIO
     esp_vfs_dev_sdio_register();
     while ((fd = open("/dev/sdio", O_RDWR)) == -1) {

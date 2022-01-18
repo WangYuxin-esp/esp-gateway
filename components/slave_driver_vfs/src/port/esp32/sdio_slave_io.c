@@ -150,7 +150,7 @@ static int sdio_open(const char* path, int flags, int mode)
     // init slave driver
     esp32_sdio_slave_init();
     xTaskCreate(sdio_slave_trans_task , "sdio_slave_trans_task" , 4096 , NULL , 10 , NULL);
-    xTaskCreate(recv_count_task , "recv_count_task" , 4096 , NULL , 4 , NULL);
+    // xTaskCreate(recv_count_task , "recv_count_task" , 4096 , NULL , 4 , NULL);
 
     return VFS_DEV_SDIO_LOCAL_FD;
 }

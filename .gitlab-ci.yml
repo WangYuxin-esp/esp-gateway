@@ -34,7 +34,7 @@ esp32_v4.3_build:
 
     - rm -rf build sdkconfig
     - idf.py set-target esp32
-    - echo -e "CONFIG_ESP_MODEM_ENABLE=y\nCONFIG_SET_VENDOR_IE=y\nCONFIG_AP_CUSTOM_IP=y" >> sdkconfig.defaults.esp32
+    - echo -e "CONFIG_ESP_MODEM_ENABLE=y\nCONFIG_SET_VENDOR_IE=y\nCONFIG_AP_CUSTOM_IP=y\nCONFIG_ENABLE_SOFTAP_FOR_WIFI_CONFIG=y" >> sdkconfig.defaults.esp32
     - idf.py build
 
 esp32_v4.4_build:
@@ -69,7 +69,7 @@ esp32_v4.4_build:
 
     - rm -rf build sdkconfig
     - idf.py set-target esp32
-    - echo -e "CONFIG_ESP_MODEM_ENABLE=y\nCONFIG_SET_VENDOR_IE=y\nCONFIG_AP_CUSTOM_IP=y" >> sdkconfig.defaults.esp32
+    - echo -e "CONFIG_ESP_MODEM_ENABLE=y\nCONFIG_SET_VENDOR_IE=y\nCONFIG_AP_CUSTOM_IP=y\nCONFIG_ENABLE_SOFTAP_FOR_WIFI_CONFIG=y" >> sdkconfig.defaults.esp32
     - idf.py build
 
 esp32c3_v4.4_build:
@@ -104,7 +104,7 @@ esp32c3_v4.4_build:
 
     - rm -rf build sdkconfig
     - idf.py set-target esp32c3
-    - echo -e "CONFIG_SET_VENDOR_IE=y\nCONFIG_AP_CUSTOM_IP=y" >> sdkconfig.defaults.esp32c3
+    - echo -e "CONFIG_SET_VENDOR_IE=y\nCONFIG_AP_CUSTOM_IP=y\nCONFIG_ENABLE_SOFTAP_FOR_WIFI_CONFIG=y" >> sdkconfig.defaults.esp32c3
     - idf.py build
 
 esp32s2_v4.4_build:
@@ -139,7 +139,7 @@ esp32s2_v4.4_build:
 
     - rm -rf build sdkconfig
     - idf.py set-target esp32s2
-    - echo -e "CONFIG_SET_VENDOR_IE=y\nCONFIG_AP_CUSTOM_IP=y" >> sdkconfig.defaults.esp32s2
+    - echo -e "CONFIG_SET_VENDOR_IE=y\nCONFIG_AP_CUSTOM_IP=y\nCONFIG_ENABLE_SOFTAP_FOR_WIFI_CONFIG=y" >> sdkconfig.defaults.esp32s2
     - idf.py build
 
 esp32s3_v4.4_build:
@@ -174,7 +174,7 @@ esp32s3_v4.4_build:
 
     - rm -rf build sdkconfig
     - idf.py set-target esp32s3
-    - echo -e "CONFIG_SET_VENDOR_IE=y\nCONFIG_AP_CUSTOM_IP=y" >> sdkconfig.defaults.esp32s3
+    - echo -e "CONFIG_SET_VENDOR_IE=y\nCONFIG_AP_CUSTOM_IP=y\nCONFIG_ENABLE_SOFTAP_FOR_WIFI_CONFIG=y" >> sdkconfig.defaults.esp32s3
     - idf.py build
 
 esp32_master_build:
@@ -199,9 +199,10 @@ esp32_master_build:
     - export IDF_PATH=$(pwd)/esp-idf
     - source $IDF_PATH/tools/ci/configure_ci_environment.sh
     - $IDF_PATH/tools/idf_tools.py --non-interactive install && eval "$($IDF_PATH/tools/idf_tools.py --non-interactive export)" || exit 1
-    - python -m pip install -r $IDF_PATH/requirements.txt
+    - python -m pip install -r $IDF_PATH/requirements.core.txt
     - cd $IDF_PATH
     - git submodule update --init --recursive
+    - idf_tools.py install-python-env
     - cd ..
 
     - idf.py set-target esp32
@@ -209,7 +210,7 @@ esp32_master_build:
 
     - rm -rf build sdkconfig
     - idf.py set-target esp32
-    - echo -e "CONFIG_SET_VENDOR_IE=y\nCONFIG_AP_CUSTOM_IP=y" >> sdkconfig.defaults.esp32
+    - echo -e "CONFIG_SET_VENDOR_IE=y\nCONFIG_AP_CUSTOM_IP=y\nCONFIG_ENABLE_SOFTAP_FOR_WIFI_CONFIG=y" >> sdkconfig.defaults.esp32
     - idf.py build
 
 push_master_to_github:

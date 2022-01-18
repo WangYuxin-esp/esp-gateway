@@ -164,6 +164,42 @@ menu "APP Configuration"
             default n
             help
                 "Enable Softap for Wi-Fi config(web server)"
+
+        if ENABLE_SOFTAP_FOR_WIFI_CONFIG
+            menu "custom ip addr"
+                config STATIC_IP_ADDR
+                    string "Static IP address"
+                    default "192.168.5.1"
+                    help
+                        Set static IP address.
+                        Note: can not set "192.168.4.1"
+
+                config STATIC_GW_ADDR
+                    string "Static gateway address"
+                    default "192.168.5.1"
+                    help
+                        Set static gateway address.
+                        Note: can not set "192.168.4.1"
+
+                config STATIC_NETMASK_ADDR
+                    string "Static netmask address"
+                    default "255.255.255.0"
+                    help
+                        Set static netmask address.
+
+                config SOFTAP_SSID
+                    string "Wi-Fi SSID"
+                    default "ESP_Dongle"
+                    help
+                        Set the SSID of SoftAP.
+
+                config SOFTAP_PASSWORD
+                    string "Wi-Fi Password"
+                    default "12345678"
+                    help
+                        Set the password of SoftAP.
+            endmenu
+        endif
     endmenu
 
     menu "GPIO Configuration(LED & Button)"
@@ -186,14 +222,14 @@ menu "APP Configuration"
                 Set the GPIO LED of ETH mode.
 
         config GPIO_LED_DONGLE
-            default "8"
+            default "15"
             int "GPIO LED of Dongle mode"
             help
                 Set the GPIO LED of Dongle mode.
 		
         config GPIO_BUTTON_SW1
-            default 34
             default 5 if IDF_TARGET_ESP32S3
+            default "34"
             int "GPIO button of switch"
             help
                 Set the GPIO button of switch.

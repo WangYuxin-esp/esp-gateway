@@ -216,7 +216,7 @@ esp_err_t esp_gateway_wifi_set(wifi_mode_t mode, const char *ssid, const char *p
 
 esp_err_t esp_gateway_wifi_napt_enable(uint32_t ip)
 {
-#ifdef CONFIG_AP_CUSTOM_IP
+#ifdef ESP_GATEWAY_AP_CUSTOM_IP
     esp_netif_ip_info_t info_t;
     memset(&info_t, 0, sizeof(esp_netif_ip_info_t));
     ip4addr_aton((const char *)(ESP_GATEWAY_AP_STATIC_IP_ADDR), (ip4_addr_t*)&info_t.ip);

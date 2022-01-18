@@ -20,6 +20,8 @@
 #include "lwip/debug.h"
 #include "lwip/tcp.h"
 
+#include "esp_gateway_config.h"
+
 uint8_t dongle_mac[6] = {0};
 esp_netif_t* dongle_netif = NULL;
 
@@ -152,7 +154,7 @@ void esp_gateway_netif_dongle_init(void)
     esp_netif_action_start(netif, NULL, 0, NULL);
     esp_netif_up(netif);
 
-#if !CONFIG_ENABLE_SOFTAP_FOR_WIFI_CONFIG
+#if !ENABLE_SOFTAP_FOR_WIFI_CONFIG
     esp_netif_dns_info_t dns;
     dns.ip.u_addr.ip4.addr = ESP_IP4TOADDR(114, 114, 114, 114);
     dns.ip.type = IPADDR_TYPE_V4;
